@@ -44,9 +44,21 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 
+
+;; setup packages
 (require 'package)
+(setq package-enable-at-startup nil) ; tells emacs not to load any packages before starting up
 (add-to-list 'package-archives
              '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+
+
+;; ;; Bootstrap use-package
+(unless (package-installed-p 'use-package) ; unless it is already installed
+  (package-refresh-contents) ; updage packages archive
+  (package-install 'use-package)) ; and install the most recent version of use-package
+(require 'use-package)
+
 
 (use-package doom-themes :ensure t
   :config
@@ -56,12 +68,12 @@
 		(doom-themes-visual-bell-config))))
 
 (use-package neotree
-  :ensure t)
+  :ensure t
+  :commands (neotree))
 
 (use-package multiple-cursors
   :ensure t
-  :config
-  (global-set-key (kbd "s-d") 'mc/mark-next-like-this))
+  :bind ("s-d" . 'mc/mark-next-like-this))
 
 
 (use-package exec-path-from-shell
@@ -70,8 +82,10 @@
   (when (memq window-system '(mac ns x))
 	(exec-path-from-shell-initialize)))
 
-(package-install 'flycheck)
-(global-flycheck-mode)
+(use-package flycheck
+  :ensure t
+  :config
+  (global-flycheck-mode))
 
 
 (use-package go-mode
@@ -97,9 +111,7 @@
 
 (use-package lsp-ui
   :ensure t
-  :commands lsp-ui-mode
-  :init
-)
+  :commands lsp-ui-mode)
 
 ;; Set up before-save hooks to format buffer and add/delete imports.
 ;; Make sure you don't have other gofmt/goimports hooks enabled.
@@ -125,24 +137,46 @@
 
 
 (use-package magit
-  :ensure t)
-
-(use-package selectrum
   :ensure t
+  :commands (magit-status))
+
+;; (use-package selectrum
+;;   :ensure t
+;;   :config
+;;   (selectrum-mode 1))
+
+(use-package ivy :ensure t
+  :config (progn (setq ivy-use-virtual-buffers t)  ;; no idea, but recommended by project maintainer
+				 (setq enable-recursive-minibuffers t) ;; no idea, but recommended by project maintainer
+				 (setq ivy-count-format "(%d/%d) ")
+				 (ivy-mode 1)))  ;; changes the format of the number of results
+
+(use-package swiper :ensure t)
+(use-package counsel :ensure t)
+
+(use-package ivy-rich :ensure t
   :config
-  (selectrum-mode 1))
+  (ivy-rich-mode 1)
+  (setq ivy-rich-path-style 'abbrev)
+  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
 
 (use-package prescient
-  :ensure t)
-
-(use-package selectrum-prescient
   :ensure t
   :config
-  ;; to make sorting and filtering more intelligent
-  (selectrum-prescient-mode +1)
-  ;; to save your command history on disk, so the sorting gets more
-  ;; intelligent over time
   (prescient-persist-mode +1))
+
+(use-package ivy-prescient
+  :ensure t
+  :config
+  (ivy-prescient-mode +1))
+
+(use-package company-prescient
+  :ensure t
+  :config
+  (company-prescient-mode +1))
+
+(use-package which-key :ensure t
+  :config (which-key-mode))
 
 
 (custom-set-variables
