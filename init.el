@@ -60,6 +60,8 @@
 (require 'use-package)
 
 
+
+;; Some Nice themes
 (use-package doom-themes :ensure t
   :config
   (if (display-graphic-p)
@@ -67,26 +69,56 @@
 		(set-face-attribute 'default nil :family "Menlo" :height 140)
 		(doom-themes-visual-bell-config))))
 
+
+
+
 (use-package neotree
   :ensure t
   :commands (neotree))
 
+
+;; Like SublimeText and VSCode
 (use-package multiple-cursors
   :ensure t
   :bind ("s-d" . 'mc/mark-next-like-this))
 
 
+
+;; Get Macos path into emacs path
 (use-package exec-path-from-shell
   :ensure t
   :config
   (when (memq window-system '(mac ns x))
 	(exec-path-from-shell-initialize)))
 
+
+;; Git Support
+(use-package magit
+  :ensure t
+  :commands (magit-status))
+
+
+;;; Get Flycheck and LSP up and running
+
 (use-package flycheck
   :ensure t
   :config
   (global-flycheck-mode))
 
+
+(use-package lsp-mode
+  :ensure t
+  :commands (lsp lsp-deferred)
+  :hook (go-mode . lsp-deferred)
+  :hook (c-mode-hook . lsp-deferred))
+
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
+
+
+
+;;; Go stuff
 
 (use-package go-mode
   :defer t
@@ -104,15 +136,6 @@
   :ensure t
   :hook (go-mode . my-go-gen-test-setup))
 
-(use-package lsp-mode
-  :ensure t
-  :commands (lsp lsp-deferred)
-  :hook (go-mode . lsp-deferred))
-
-(use-package lsp-ui
-  :ensure t
-  :commands lsp-ui-mode)
-
 ;; Set up before-save hooks to format buffer and add/delete imports.
 ;; Make sure you don't have other gofmt/goimports hooks enabled.
 (defun lsp-go-install-save-hooks ()
@@ -120,6 +143,20 @@
   (add-hook 'before-save-hook #'lsp-format-buffer t t)
   (add-hook 'before-save-hook #'lsp-organize-imports t t))
 (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
+
+
+
+;; C# Stuff
+(use-package tree-sitter)
+(use-package tree-sitter-langs)
+
+(use-package csharp-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.cs\\'" . csharp-tree-sitter-mode))
+  :hook (csharp-mode . electric-pair-mode))
+
+
+
 
 ;;Company mode is a standard completion package that works well with lsp-mode.
 ;;company-lsp integrates company mode completion with lsp-mode.
@@ -136,14 +173,13 @@
   :commands company-lsp);;Optional - provides fancier overlays.
 
 
-(use-package magit
-  :ensure t
-  :commands (magit-status))
 
-;; (use-package selectrum
-;;   :ensure t
-;;   :config
-;;   (selectrum-mode 1))
+
+
+
+
+
+;; Setup Ivy, Counsel, Swiper, Prescient...
 
 (use-package ivy :ensure t
   :config (progn (setq ivy-use-virtual-buffers t)  ;; no idea, but recommended by project maintainer
@@ -174,9 +210,6 @@
   :ensure t
   :config
   (company-prescient-mode +1))
-
-(use-package which-key :ensure t
-  :config (which-key-mode))
 
 
 (custom-set-variables
