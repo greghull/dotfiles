@@ -15,12 +15,15 @@
 (setq coding-system-for-read 'utf-8 )	; use utf-8 by default
 (setq coding-system-for-write 'utf-8 )
 (setq initial-scratch-message "") ; print a default message in the empty scratch buffer opened at startup
-(setq mouse-autoselect-window 0.1) ; auto select window under mouse
+(setq mouse-autoselect-window nil) ; click to select window under mouse
 (setq-default truncate-lines t) ; don't wrap lines by default
 (setq-default tab-width 4) ;default tab width 4
 
-;(setq default-frame-alist '((fullscreen . maximized)))
-(setq default-frame-alist '((undecorated . t) (fullscreen . maximized))) ; no window title for more editing space
+;; want this on the desktop
+(setq default-frame-alist '((fullscreen . maximized)))
+
+;; only want this on thje laptop
+;(setq default-frame-alist '((undecorated . t) (fullscreen . maximized))) ; no window title for more editing space
 
 ;; slow down mouse scrolling
 (setq mouse-wheel-scroll-amount '(0.1))
@@ -145,18 +148,30 @@
 (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
 
 
+;; Support for .NET stuff
 
-;; C# Stuff
-(use-package tree-sitter)
-(use-package tree-sitter-langs)
+(use-package tree-sitter :ensure t)
+(use-package tree-sitter-langs :ensure t)
+
 
 (use-package csharp-mode
+  :ensure t
   :config
-  (add-to-list 'auto-mode-alist '("\\.cs\\'" . csharp-tree-sitter-mode))
+  :mode ("\\.cs\\'" . csharp-mode)
   :hook (csharp-mode . electric-pair-mode))
 
 
+(use-package fsharp-mode
+  :defer t
+  :ensure t)
 
+
+;; Support for .csprog files
+(define-derived-mode csproj-mode xml-mode "csproj"
+  "A major mode for editing csproj and other msbuild-style project files"
+  :group 'csproj)
+
+(add-to-list 'auto-mode-alist '("\\.[^.]*proj\\'" . csproj-mode))
 
 ;;Company mode is a standard completion package that works well with lsp-mode.
 ;;company-lsp integrates company mode completion with lsp-mode.
@@ -182,19 +197,41 @@
 ;; Setup Ivy, Counsel, Swiper, Prescient...
 
 (use-package ivy :ensure t
-  :config (progn (setq ivy-use-virtual-buffers t)  ;; no idea, but recommended by project maintainer
-				 (setq enable-recursive-minibuffers t) ;; no idea, but recommended by project maintainer
-				 (setq ivy-count-format "(%d/%d) ")
-				 (ivy-mode 1)))  ;; changes the format of the number of results
-
-(use-package swiper :ensure t)
-(use-package counsel :ensure t)
-
-(use-package ivy-rich :ensure t
   :config
-  (ivy-rich-mode 1)
-  (setq ivy-rich-path-style 'abbrev)
-  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
+  (setq ivy-use-virtual-buffers t)  ;; no idea, but recommended by project maintainer
+  (setq enable-recursive-minibuffers t) ;; no idea, but recommended by project maintainer
+  (setq ivy-count-format "(%d/%d) ")
+  (setq ivy-use-selectable-prompt t)
+  (define-key ivy-minibuffer-map (kbd "C-j") #'ivy-immediate-done)
+  (define-key ivy-minibuffer-map (kbd "RET") #'ivy-alt-done)
+  (ivy-mode 1))  ;; changes the format of the number of results
+
+(use-package swiper :ensure t
+  :config
+  (global-set-key "\C-s" 'swiper))
+
+(use-package counsel :ensure t
+  :config
+  (counsel-mode 1))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (use-package ivy-rich :ensure t											  ;;
+;;   :config																  ;;
+;;   (ivy-rich-mode 1)														  ;;
+;;   (setq ivy-rich-path-style 'abbrev)										  ;;
+;;   (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)) ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package ivy-posframe
+  :ensure t
+  :config
+  (setq ivy-posframe-display-functions-alist
+      '((swiper          . ivy-posframe-display-at-frame-top-center)
+        (complete-symbol . ivy-posframe-display-at-point)
+        (counsel-M-x     . ivy-posframe-display-at-frame-top-center)
+        (t               . ivy-posframe-display-at-frame-top-center)))
+  (ivy-posframe-mode 1))
+
 
 (use-package prescient
   :ensure t
@@ -223,7 +260,7 @@
  '(dired-listing-switches "-alop")
  '(horizontal-scroll-bar-mode nil)
  '(package-selected-packages
-   '(go-gen-test multiple-cursors neotree evil rust-mode selectrum-prescient prescient selectrum magit counsel ivy doom-themes flycheck lsp-ui exec-path-from-shell company-lsp company lsp-mode go-mode use-package))
+   '(ivy-posframe fsharp-mode tree-sitter-langs tree-sitter csharp-mode go-gen-test multiple-cursors neotree evil rust-mode selectrum-prescient prescient selectrum magit counsel ivy doom-themes flycheck lsp-ui exec-path-from-shell company-lsp company lsp-mode go-mode use-package))
  '(scroll-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
