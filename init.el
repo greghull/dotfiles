@@ -148,6 +148,18 @@
 (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
 
 
+
+;; C++ Stuff
+;; Set up before-save hooks to format buffer and add/delete imports.
+;; Make sure you don't have other gofmt/goimports hooks enabled.
+(defun lsp-cpp-install-save-hooks ()
+  "Format C++ buffers and imports before saving."
+  (add-hook 'before-save-hook #'lsp-format-buffer t t)
+  (add-hook 'before-save-hook #'lsp-organize-imports t t))
+(add-hook 'cpp-mode-hook #'lsp-cpp-install-save-hooks)
+
+
+
 ;; Support for .NET stuff
 
 (use-package tree-sitter :ensure t)
@@ -222,15 +234,19 @@
 ;;   (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)) ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(use-package ivy-posframe
-  :ensure t
-  :config
-  (setq ivy-posframe-display-functions-alist
-      '((swiper          . ivy-posframe-display-at-frame-top-center)
-        (complete-symbol . ivy-posframe-display-at-point)
-        (counsel-M-x     . ivy-posframe-display-at-frame-top-center)
-        (t               . ivy-posframe-display-at-frame-top-center)))
-  (ivy-posframe-mode 1))
+;; too unstable ....
+;; (use-package ivy-posframe
+;;   :ensure t
+;;   :config
+;;   (setq ivy-posframe-display-functions-alist
+;;       '((swiper          . ivy-posframe-display-at-frame-center)
+;;         (complete-symbol . ivy-posframe-display-at-point)
+;;         (counsel-M-x     . ivy-posframe-display-at-frame-center)
+;;         (t               . ivy-posframe-display-at-frame-center)))
+;;   (ivy-posframe-mode 1)
+;;   (setq ivy-posframe-parameters
+;;       '((left-fringe . 8)
+;;         (right-fringe . 8))))
 
 
 (use-package prescient
