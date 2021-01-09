@@ -20,17 +20,17 @@
 (setq-default tab-width 4) ;default tab width 4
 
 ;; want this on the desktop
-(setq default-frame-alist '((fullscreen . maximized)))
-
+;(setq default-frame-alist '((fullscreen . maximized)))
 ;; only want this on thje laptop
 ;(setq default-frame-alist '((undecorated . t) (fullscreen . maximized))) ; no window title for more editing space
 
+;; maybe not needed for the emacs-mac port?
 ;; slow down mouse scrolling
-(setq mouse-wheel-scroll-amount '(0.1))
-(setq mouse-wheel-progressive-speed nil)
-(setq scroll-margin 0
-	  scroll-conservatively 100000
-	  scroll-preserve-screen-position 1)
+;;(setq mouse-wheel-scroll-amount '(0.1))
+;;(setq mouse-wheel-progressive-speed nil)
+;;(setq scroll-margin 0
+;;	  scroll-conservatively 100000
+;;	  scroll-preserve-screen-position 1)
 
 ;;(toggle-scroll-bar -1)
 ;; disable scrollbars
@@ -45,6 +45,31 @@
 (blink-cursor-mode 1)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
+
+;; some mac friendly key bindings
+;;
+;; set special keys
+(setq mac-command-modifier 'super)
+(setq mac-option-modifier 'meta)
+
+;; general operations
+(global-set-key (kbd "s-n") 'make-frame-command)
+(global-set-key (kbd "s-w") 'delete-frame)
+(global-set-key (kbd "s-q") 'save-buffers-kill-terminal)
+
+;; file operations
+(global-set-key (kbd "s-o") 'find-file)
+(global-set-key (kbd "s-s") 'save-buffer)
+
+
+;; clipboard and selection
+(global-set-key (kbd "s-x") 'kill-region)
+(global-set-key (kbd "s-c") 'kill-ring-save)
+(global-set-key (kbd "s-v") 'yank)
+(global-set-key (kbd "s-a") 'mark-whole-buffer)
+
+;; other
+(global-set-key (kbd "s-z") 'undo)
 
 
 
@@ -120,6 +145,24 @@
   :commands lsp-ui-mode)
 
 
+
+;; Web stuff
+
+(use-package web-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode)))
+
+
+
+;; needed for pandoc-mode
+(use-package hydra :ensure t)
+
+;; Markdown stuff
+(use-package pandoc-mode
+  :ensure t
+  :hook (markdown-mode . pandoc-mode)
+  :hook (pandoc-mode . pandoc-load-default-settings))
 
 ;;; Go stuff
 
@@ -226,28 +269,6 @@
   :config
   (counsel-mode 1))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (use-package ivy-rich :ensure t											  ;;
-;;   :config																  ;;
-;;   (ivy-rich-mode 1)														  ;;
-;;   (setq ivy-rich-path-style 'abbrev)										  ;;
-;;   (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)) ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; too unstable ....
-;; (use-package ivy-posframe
-;;   :ensure t
-;;   :config
-;;   (setq ivy-posframe-display-functions-alist
-;;       '((swiper          . ivy-posframe-display-at-frame-center)
-;;         (complete-symbol . ivy-posframe-display-at-point)
-;;         (counsel-M-x     . ivy-posframe-display-at-frame-center)
-;;         (t               . ivy-posframe-display-at-frame-center)))
-;;   (ivy-posframe-mode 1)
-;;   (setq ivy-posframe-parameters
-;;       '((left-fringe . 8)
-;;         (right-fringe . 8))))
-
 
 (use-package prescient
   :ensure t
@@ -276,7 +297,7 @@
  '(dired-listing-switches "-alop")
  '(horizontal-scroll-bar-mode nil)
  '(package-selected-packages
-   '(ivy-posframe fsharp-mode tree-sitter-langs tree-sitter csharp-mode go-gen-test multiple-cursors neotree evil rust-mode selectrum-prescient prescient selectrum magit counsel ivy doom-themes flycheck lsp-ui exec-path-from-shell company-lsp company lsp-mode go-mode use-package))
+   '(pandoc-mode web-mode ivy-posframe fsharp-mode tree-sitter-langs tree-sitter csharp-mode go-gen-test multiple-cursors neotree evil rust-mode selectrum-prescient prescient selectrum magit counsel ivy doom-themes flycheck lsp-ui exec-path-from-shell company-lsp company lsp-mode go-mode use-package))
  '(scroll-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
