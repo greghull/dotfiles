@@ -39,6 +39,7 @@
 (fringe-mode '(5 . 5))
 (show-paren-mode 1) ; show matching parens
 (blink-cursor-mode 1)
+(column-number-mode)
 
 
 
@@ -308,6 +309,13 @@
      (width . 0.7)
      (left . 0.5)))))
 
+(use-package which-key :ensure t
+  :init
+  (which-key-mode)
+  (setq which-key-show-early-on-C-h t)
+  (setq which-key-popup-type 'side-window)
+  (which-key-setup-side-window-right-bottom))
+
 
 ;;; custom functions
 (defun insert-current-date (&optional omit-day-of-week-p)
@@ -332,8 +340,9 @@
  '(horizontal-scroll-bar-mode nil)
  '(mac-command-modifier 'super)
  '(mac-option-modifier 'meta)
+ '(mini-frame-show-parameters '((top . 30) (width . 0.7) (left . 0.5)))
  '(package-selected-packages
-   '(mini-frame mini-frame-mode emacs-mini-frame ivy-prescient company-prescient doom-modeline ido-vertical smex diminish pandoc-mode web-mode ivy-posframe fsharp-mode tree-sitter-langs tree-sitter csharp-mode go-gen-test multiple-cursors neotree evil rust-mode prescient magit counsel ivy doom-themes flycheck lsp-ui exec-path-from-shell company-lsp company lsp-mode go-mode use-package))
+   '(which-key mini-frame mini-frame-mode emacs-mini-frame ivy-prescient company-prescient doom-modeline ido-vertical smex diminish pandoc-mode web-mode ivy-posframe fsharp-mode tree-sitter-langs tree-sitter csharp-mode go-gen-test multiple-cursors neotree evil rust-mode prescient magit counsel ivy doom-themes flycheck lsp-ui exec-path-from-shell company-lsp company lsp-mode go-mode use-package))
  '(scroll-bar-mode nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
