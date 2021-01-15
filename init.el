@@ -102,6 +102,7 @@
                    (setq arg (not arg))
                    (buffer-menu arg)))
 (global-set-key (kbd "s-p") 'project-find-file)
+(global-set-key (kbd "s-g") 'magit-status)
 
 
 ;; clipboard and selection
