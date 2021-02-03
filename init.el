@@ -28,6 +28,10 @@
 (delete-selection-mode 1)
 (defalias 'yes-or-no-p 'y-or-n-p)
 (cua-selection-mode 1)
+(setq dired-dwim-target t)
+(setq default-frame-alist '((undecorated . t)))
+(toggle-frame-maximized)
+(setq frame-resize-pixelwise t)
 
 ;; memory management settings
 (setq read-process-output-max (* 4096 10))
@@ -83,6 +87,13 @@
   :ensure t
   :init (doom-modeline-mode 1))
 
+; needed for projectile ripgrep
+(use-package ripgrep :ensure t)
+
+(use-package projectile :ensure t
+  :config
+  (projectile-mode 1))
+
 ; needed by dashboard
 (use-package page-break-lines :ensure t)
 
@@ -94,11 +105,11 @@
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
   (setq dashboard-set-navigator t)
-  (setq dashboard-projects-backend 'project-el)
+  (setq dashboard-projects-backend 'projectile)
   (setq dashboard-items '((recents  . 5)
-                          (projects . 5)
+						  (projects . 5)
 						  (bookmarks . 5)
-                        (registers . 5)))
+						(registers . 5)))
   (dashboard-setup-startup-hook))
 
 
@@ -119,11 +130,12 @@
 ;; list open file buffers to switch
 (global-set-key (kbd "s-b")
 				'(lambda (&optional arg)
-                   "runs buffer-menu but with the sense of C-u inverted (ie files-only unless C-u is given)"
-                   (interactive "P")
-                   (setq arg (not arg))
-                   (buffer-menu arg)))
-(global-set-key (kbd "s-p") 'project-find-file)
+				   "runs buffer-menu but with the sense of C-u inverted (ie files-only unless C-u is given)"
+				   (interactive "P")
+				   (setq arg (not arg))
+				   (buffer-menu arg)))
+(global-set-key (kbd "s-p") 'projectile-find-file)
+(global-set-key (kbd "s-f") 'projectile-ripgrep)
 (global-set-key (kbd "s-g") 'magit-status)
 
 
@@ -137,6 +149,22 @@
 (global-set-key (kbd "s-z") 'undo)
 (global-set-key (kbd "s-l") 'goto-line)
 
+(defun visit-term-buffer ()
+  "Create or visit a terminal buffer."
+  (interactive)
+  (if (not (get-buffer "vterm"))
+	  (progn
+		(split-window-sensibly (selected-window))
+		(other-window 1)
+		(vterm))
+	(switch-to-buffer-other-window "vterm")))
+
+(global-set-key (kbd "s-t") 'visit-term-buffer)
+
+(use-package expand-region
+  :ensure t
+  :config
+  (global-set-key (kbd "<f5>") 'er/expand-region))
 
 
 ;; diminish various mode names
@@ -189,15 +217,15 @@
 (use-package lsp-mode
   :ensure t
   :commands (lsp lsp-deferred)
-  :hook (go-mode . lsp-deferred)
-  :hook (python-mode . lsp-deferred)
-  :hook (c-mode-hook . lsp-deferred))
+  :hook (prog-mode . lsp)
+  :hook (prog-mode . display-line-numbers-mode))
 
 (use-package lsp-ui
   :ensure t
-  :commands lsp-ui-mode)
-
-
+  :commands lsp-ui-mode
+  :config
+  (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
+  (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references))
 
 ;; Web stuff
 
@@ -208,7 +236,7 @@
 
 
 
-;; needed for pandoc-mode
+;; Needed for pandoc-mode
 (use-package hydra :ensure t)
 
 ;; Markdown stuff
@@ -332,15 +360,6 @@
   :config
   (company-prescient-mode +1))
 
-;; (use-package mini-frame
-;;   :ensure t
-;;   :config
-;;   (mini-frame-mode)
-;;   (custom-set-variables
-;;   `(mini-frame-show-parameters
-;;    '((top . 0.1)
-;;      (width . 0.9)
-;;      (left . 0.5)))))
 
 (use-package which-key :ensure t
   :init
@@ -361,13 +380,13 @@
 "Insert today's date using the current locale.
 With a prefix argument, the date is inserted without the day of
 the week."
-    (interactive "P*")
-    (insert (calendar-date-string (calendar-current-date) nil
+	(interactive "P*")
+	(insert (calendar-date-string (calendar-current-date) nil
 								  omit-day-of-week-p)))
 
 
 ;; For smooth scrolling
-    ;; scroll one line at a time (less "jumpy" than defaults)
+	;; scroll one line at a time (less "jumpy" than defaults)
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
 (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
 (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
@@ -377,6 +396,15 @@ the week."
 (use-package yaml-mode :ensure t)
 
 (use-package toml-mode :ensure t)
+
+(use-package vterm :defer t)
+
+(use-package crux
+  :ensure t
+  :config
+  (global-set-key (kbd "C-c <tab>") 'crux-cleanup-buffer-or-region)
+  (global-set-key (kbd "s-j") 'crux-top-join-line)
+  (global-set-key (kbd "C-a") 'crux-move-beginning-of-line))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -431,6 +459,7 @@ the week."
  '(jdee-db-spec-breakpoint-face-colors (cons "#1B2229" "#3f444a"))
  '(line-number-mode nil)
  '(line-spacing 0.2)
+ '(lsp-python-ms-auto-install-server t nil nil "Customized with use-package lsp-python-ms")
  '(mini-frame-show-parameters '((top . 16) (width . 0.9) (left . 0.5)))
  '(nrepl-message-colors
    '("#032f62" "#6a737d" "#d73a49" "#6a737d" "#005cc5" "#6f42c1" "#d73a49" "#6a737d"))
@@ -439,7 +468,7 @@ the week."
  '(objed-cursor-color "#ff6c6b")
  '(org-src-block-faces 'nil)
  '(package-selected-packages
-   '(github-theme atom-one-dark-theme flatland-theme plan9-theme centaur-tabs modus-themes deadgrep dashboard toml-mode yaml-mode sublimity-scroll yasnippet ivy-rich which-key mini-frame mini-frame-mode emacs-mini-frame ivy-prescient company-prescient doom-modeline ido-vertical smex diminish pandoc-mode web-mode ivy-posframe fsharp-mode tree-sitter-langs tree-sitter csharp-mode go-gen-test multiple-cursors neotree evil rust-mode prescient magit counsel ivy doom-themes flycheck lsp-ui exec-path-from-shell company lsp-mode go-mode use-package))
+   '(crux vterm expand-region ripgrep projectile github-theme atom-one-dark-theme flatland-theme plan9-theme centaur-tabs modus-themes deadgrep dashboard toml-mode yaml-mode sublimity-scroll yasnippet ivy-rich which-key mini-frame mini-frame-mode emacs-mini-frame ivy-prescient company-prescient doom-modeline ido-vertical smex diminish pandoc-mode web-mode ivy-posframe fsharp-mode tree-sitter-langs tree-sitter csharp-mode go-gen-test multiple-cursors neotree evil rust-mode prescient magit counsel ivy doom-themes flycheck lsp-ui exec-path-from-shell company lsp-mode go-mode use-package))
  '(pdf-view-midnight-colors (cons "#bbc2cf" "#282c34"))
  '(rustic-ansi-faces
    ["#282c34" "#ff6c6b" "#98be65" "#ECBE7B" "#51afef" "#c678dd" "#46D9FF" "#bbc2cf"])
